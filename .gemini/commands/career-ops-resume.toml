@@ -16,10 +16,10 @@ Load the resume editing context:
 Execute the resume editing workflow based on the action:
 - If Action is 'Tailor': Tailor the resume to the JD provided in Context.
 - If Action is 'Update': Add the new projects/experience from Context.
-- If Action is 'Generate': Generate a fresh resume from existing data.
+- If Action is 'Generate': Generate a fresh resume from existing data. Run: node generate-resume-all.mjs --data ./output/resume_data.json
 
 Follow all ATS and language quality rules in modes/resume-editor.md.
-Always use generateResume() from resume_template.js for output.
+Ensure all outputs are placed in the ./output/ directory.
 """
 
 [[questions]]

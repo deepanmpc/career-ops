@@ -9,10 +9,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const { generateResume, generateHTML, SAMPLE_DATA } = require('./resume_template.js');
+import { generateResume, generateHTML, SAMPLE_DATA } from './resume_template.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outputDir = resolve(__dirname, 'output');
@@ -39,18 +36,33 @@ async function run() {
   let html = readFileSync(templatePath, 'utf8');
   const placeholders = generateHTML(data);
 
-  // Simple placeholder replacement
-  for (const [key, value] of Object.entries(placeholders)) {
-    const regex = new RegExp(`{{${key}}}`, 'g');
-    html = html.replace(regex, value || '');
+  // Inject defaults for missing sections or config
+  const defaults = {
+    PAGE_WIDTH: '210mm',
+    SECTION_SUMMARY: 'Professional Summary',
+    SECTION_COMPETENCIES: 'Core Competencies',
+    SECTION_EDUCATION: 'Education',
+    SECTION_EXPERIENCE: 'Work Experience',
+    SECTION_PROJECTS: 'Projects',
+    SECTION_SKILLS: 'Technical Skills',
+    SECTION_CERTIFICATIONS: 'Certifications',
+    COMPETENCIES: ''
+  };
+
+  const finalPlaceholders = { ...defaults, ...placeholders };
+
+  // Safe string replacement (avoids $ expansion in values)
+  for (const [key, value] of Object.entries(finalPlaceholders)) {
+    const target = `{{${key}}}`;
+    html = html.split(target).join(value || '');
   }
   
-  // Handle basic Handlebars-like blocks if needed
+  // Handle basic Handlebars-like blocks
   html = html.replace(/{{#if\s+(\w+)}}([\s\S]*?){{\/if}}/g, (match, key, content) => {
-    return placeholders[key] ? content : '';
+    return finalPlaceholders[key] ? content : '';
   });
 
-  // Set default values for missing placeholders
+  // Strip any remaining unset placeholders
   html = html.replace(/{{[A-Z_]+}}/g, '');
 
   const tempHtmlPath = resolve(outputDir, 'resume_temp.html');

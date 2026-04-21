@@ -117,4 +117,3 @@ If `modes/_profile.md` is missing, copy from `modes/_profile.template.md` silent
 2. Run `node verify-pipeline.mjs` to check health.
 3. All reports MUST include `**URL:**` and `**Legitimacy:**` in the header.
 4. All statuses MUST be canonical (see `templates/states.yml`).
-templates/states.yml`).

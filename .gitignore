@@ -1,14 +1,17 @@
 # Personal data (user fills these)
 cv.md
 article-digest.md
-interview-prep/*
+interview-prep/**
 !interview-prep/.gitkeep
-data/*
+data/**
 !data/.gitkeep
-reports/*.md
+reports/**
 !reports/.gitkeep
-output/*
+output/**
 !output/.gitkeep
+portals.yml
+config/profile.yml
+modes/_profile.md
 batch/logs/*
 !batch/logs/.gitkeep
 batch/batch-state.tsv

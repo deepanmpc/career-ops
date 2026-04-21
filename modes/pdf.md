@@ -51,9 +51,9 @@
 | Placeholder | Estructura HTML esperada |
 |-------------|-------------------------|
 | `{{SKILLS}}` | `<div class="skill-row"><div class="skill-label">Category:</div><div class="skill-values">Skill 1, Skill 2...</div></div>` |
-| `{{EXPERIENCE}}` | `<div class="item"><div class="item-title">Role — Company</div><div class="item-meta">Date | Location</div><ul><li>Bullet 1</li></ul></div>` |
-| `{{PROJECTS}}` | `<div class="item"><div class="item-title">Project Name — Description</div><div class="item-meta">Tech Stack | Date</div><ul><li>Detailed bullet 1 (Technical challenge & approach)</li><li>Detailed bullet 2 (Architecture & key components)</li><li>Detailed bullet 3 (Quantitative results & impact)</li></ul></div>` |
-| `{{EDUCATION}}` | `<div class="item"><div class="item-title">Degree — University</div><div class="item-meta">GPA | Expected Date</div></div>` |
+| `{{EXPERIENCE}}` | `<div class="item"><div class="item-title">Role — Company</div><div class="item-meta">Date \| Location</div><ul><li>Bullet 1</li></ul></div>` |
+| `{{PROJECTS}}` | `<div class="item"><div class="item-title">Project Name — Description</div><div class="item-meta">Tech Stack \| Date</div><ul><li>Detailed bullet 1 (Technical challenge & approach)</li><li>Detailed bullet 2 (Architecture & key components)</li><li>Detailed bullet 3 (Quantitative results & impact)</li></ul></div>` |
+| `{{EDUCATION}}` | `<div class="item"><div class="item-title">Degree — University</div><div class="item-meta">GPA \| Expected Date</div></div>` |
 
 
 ## Orden de secciones (optimizado "6-second recruiter scan")

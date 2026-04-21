@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>career-ops | dashboard</title>
+    <title>career-ops | command center</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700&display=swap');
 
@@ -67,7 +67,8 @@
         .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); }
 
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex-shrink: 0; }
-        .stat-card { background: var(--panel-bg); border: 0.5px solid var(--border); padding: 1.25rem; border-radius: 12px; }
+        .stat-card { background: var(--panel-bg); border: 0.5px solid var(--border); padding: 1.25rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         .stat-value { font-size: 28px; font-weight: 700; line-height: 1; }
         .stat-label { font-size: 11px; color: var(--txt-muted); font-family: var(--mono); margin-top: 8px; text-transform: uppercase; }
 
@@ -79,7 +80,6 @@
             gap: 1.5rem; 
             overflow-y: auto; 
             padding-right: 8px;
-            /* Ensure children take proper space */
             min-height: 0;
         }
 
@@ -106,15 +106,12 @@
         tr:hover { background: rgba(255, 255, 255, 0.03); }
         td { padding: 12px 0; }
 
-        .terminal { background: #000; border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: auto; flex-shrink: 0; }
+        .terminal { background: #000; border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: auto; flex-shrink: 0; display: flex; flex-direction: column; }
         .term-header { padding: 10px 14px; background: #111; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; }
-        .term-body { height: 200px; padding: 1rem; font-family: var(--mono); font-size: 11px; line-height: 1.4; overflow-y: auto; color: var(--green); white-space: pre-wrap; word-break: break-all; }
+        .term-body { height: 160px; padding: 1rem; font-family: var(--mono); font-size: 11px; line-height: 1.4; overflow-y: auto; color: var(--green); white-space: pre-wrap; word-break: break-all; }
 
         .sidebar { display: flex; flex-direction: column; gap: 1.5rem; flex-shrink: 0; }
         .side-panel { background: var(--panel-bg); border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; }
-        .pipe-list { padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; }
-        .pipe-item { display: flex; gap: 10px; font-size: 12px; }
-        .pipe-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; }
         
         .action-list { padding: 1.25rem; display: flex; flex-direction: column; gap: 8px; }
         .action-btn { background: var(--panel-bg); border: 0.5px solid var(--border); color: var(--txt-secondary); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; font-size: 12px; width: 100%; text-align: left; }
@@ -132,12 +129,12 @@
         .b-green { background: rgba(74,222,128,0.2); color: #4ade80; }
         .b-gray { background: rgba(255,255,255,0.1); color: #aaa; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
 </head>
 <body>
 
@@ -145,7 +142,7 @@
     <header>
         <div class="logo-group">
             <div class="logo-box">C</div>
-            <div class="logo-text"><h1>career-ops</h1><p>/ dashboard · local node</p></div>
+            <div class="logo-text"><h1>career-ops</h1><p>/ dashboard · remote terminal</p></div>
         </div>
         <div class="status-pill"><div class="status-dot"></div>ready</div>
     </header>
@@ -157,17 +154,17 @@
             <div class="panel">
                 <div class="panel-header"><span class="panel-title">Command Center</span></div>
                 <div class="jd-input-section">
-                    <p style="font-family: var(--mono); font-size: 11px; color: var(--txt-muted); margin-bottom: 8px;">/ career-ops — auto-pipeline</p>
+                    <p style="font-family: var(--mono); font-size: 11px; color: var(--txt-muted); margin-bottom: 8px;">/ career-ops — type to terminal</p>
                     <div class="jd-wrapper">
-                        <textarea id="jd-input" placeholder="Paste JD or URL..."></textarea>
-                        <button class="run-btn" onclick="runAutoPipeline()">Run ↗</button>
+                        <textarea id="jd-input" placeholder="Paste JD/URL here... it will be sent to your active terminal window."></textarea>
+                        <button class="run-btn" onclick="runAutoPipeline()">Send ↗</button>
                     </div>
                 </div>
 
                 <div class="modes-grid">
-                    <div class="mode-tile" onclick="streamCmd('node scan.mjs')">⌕<br>scan</div>
-                    <div class="mode-tile" onclick="streamCmd('node generate-pdf.mjs')">↓<br>pdf</div>
-                    <div class="mode-tile" onclick="streamCmd('batch/batch-runner.sh')">≡<br>batch</div>
+                    <div class="mode-tile" onclick="terminalSend('/career-ops scan')">⌕<br>scan</div>
+                    <div class="mode-tile" onclick="terminalSend('/career-ops pdf')">↓<br>pdf</div>
+                    <div class="mode-tile" onclick="terminalSend('/career-ops batch')">≡<br>batch</div>
                     <div class="mode-tile" onclick="loadDashboard()">◫<br>refresh</div>
                 </div>
 
@@ -187,9 +184,9 @@
                         <div style="width:10px; height:10px; border-radius:50%; background:#ffbd2e;"></div>
                         <div style="width:10px; height:10px; border-radius:50%; background:#27c93f;"></div>
                     </div>
-                    <span style="font-family: var(--mono); font-size: 11px; color: #666; margin-left: auto;">career-ops terminal</span>
+                    <span style="font-family: var(--mono); font-size: 11px; color: #666; margin-left: auto;">career-ops console</span>
                 </div>
-                <div class="term-body" id="term-log">Welcome to command center. Ready for commands.</div>
+                <div class="term-body" id="term-log">Welcome Deepan. Send commands above to see results in your terminal.</div>
             </div>
         </div>
 
@@ -197,9 +194,11 @@
             <div class="side-panel">
                 <div class="panel-header"><span class="panel-title">Actions</span></div>
                 <div class="action-list">
-                    <button class="action-btn" onclick="streamCmd('node scan.mjs')">Scan Portals ↗</button>
-                    <button class="action-btn" onclick="streamCmd('node pipeline.mjs')">Process Inbox ↗</button>
-                    <button class="action-btn" onclick="streamCmd('node followup-cadence.mjs')">Follow-ups ↗</button>
+                    <button class="action-btn" onclick="terminalSend('/career-ops scan')">Scan Portals ↗</button>
+                    <button class="action-btn" onclick="terminalSend('/career-ops pipeline')">Process Inbox ↗</button>
+                    <button class="action-btn" onclick="terminalSend('/career-ops followup')">Follow-ups ↗</button>
+                    <button class="action-btn" onclick="terminalSend('/career-ops patterns')">Analyze Patterns ↗</button>
+                    <button class="action-btn" onclick="terminalSend('/career-ops tracker')">CLI Tracker ↗</button>
                 </div>
             </div>
         </div>
@@ -214,7 +213,27 @@
     <div id="report-content" class="overlay-body"></div>
 </div>
 
-<div id="toast">Command started</div>
+<div id="toast">Command sent</div>
+
+<script src="app.js"></script>
+</body>
+</html>
+ton>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="report-panel" class="overlay">
+    <div class="panel-header">
+        <h2 id="report-title">Report</h2>
+        <button onclick="closeReport()" class="close-btn">&times;</button>
+    </div>
+    <div id="report-content" class="overlay-body"></div>
+</div>
+
+<div id="toast">Command sent</div>
 
 <script src="app.js"></script>
 </body>

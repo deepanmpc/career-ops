@@ -17,16 +17,51 @@ function renderTable(data) {
     data.forEach(app => {
         const tr = document.createElement('tr');
         tr.onclick = () => openReport(app.company, app.report);
+        
         const scoreVal = parseFloat(app.score) || 0;
         const scoreColor = scoreVal >= 4.5 ? 'var(--green)' : scoreVal >= 4.0 ? 'var(--accent)' : 'var(--red)';
+        
         const status = (app.status || '').toLowerCase();
-        const statusClass = status.includes('interview') ? 'b-blue' : status.includes('applied') ? 'b-amber' : 'b-gray';
-        tr.innerHTML = `
-            <td><div class="co-name">${app.company}</div><div style="color:var(--txt-muted);font-size:11px;">${app.role}</div></td>
-            <td><span style="font-weight:700;color:${scoreColor}">${app.score}</span></td>
-            <td style="text-align:center"><span class="status-tag ${statusClass}">${app.status}</span></td>
-            <td style="text-align:right;color:var(--txt-muted)">${app.date}</td>
-        `;
+        let statusClass = 'b-gray';
+        if (status.includes('interview')) statusClass = 'b-blue';
+        else if (status.includes('applied')) statusClass = 'b-amber';
+        else if (status.includes('screening')) statusClass = 'b-green';
+
+        const tdName = document.createElement('td');
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'co-name';
+        nameDiv.textContent = app.company;
+        const roleDiv = document.createElement('div');
+        roleDiv.style.color = 'var(--txt-muted)';
+        roleDiv.style.fontSize = '11px';
+        roleDiv.textContent = app.role;
+        tdName.appendChild(nameDiv);
+        tdName.appendChild(roleDiv);
+
+        const tdScore = document.createElement('td');
+        const scoreSpan = document.createElement('span');
+        scoreSpan.style.fontWeight = '700';
+        scoreSpan.style.color = scoreColor;
+        scoreSpan.textContent = app.score;
+        tdScore.appendChild(scoreSpan);
+
+        const tdStatus = document.createElement('td');
+        tdStatus.style.textAlign = 'center';
+        const statusTag = document.createElement('span');
+        statusTag.className = `status-tag ${statusClass}`;
+        statusTag.textContent = app.status;
+        tdStatus.appendChild(statusTag);
+
+        const tdDate = document.createElement('td');
+        tdDate.style.textAlign = 'right';
+        tdDate.style.color = 'var(--txt-muted)';
+        tdDate.textContent = app.date;
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdScore);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdDate);
+        
         tbody.appendChild(tr);
     });
 }
@@ -59,36 +94,22 @@ function filterTable(type) {
     else renderTable(allAppData.filter(a => (a.status || '').toLowerCase().includes(type)));
 }
 
-function streamCmd(cmd, args = '') {
-    const output = document.getElementById('term-log');
-    const pCmd = document.createElement('p');
-    pCmd.innerHTML = `<span style="color:#888;margin-right:8px;">$</span><span>${cmd} ${args}</span>`;
-    output.appendChild(pCmd);
-    output.scrollTop = output.scrollHeight;
-    
-    const ev = new EventSource(`/api/stream-command?cmd=${encodeURIComponent(cmd)}&args=${encodeURIComponent(args)}`);
-    ev.onmessage = (e) => {
-        const d = JSON.parse(e.data);
-        if (d.output) {
-            const span = document.createElement('span');
-            span.innerText = d.output;
-            output.appendChild(span);
-            output.scrollTop = output.scrollHeight;
-        }
-        if (d.done) {
-            ev.close();
-            const p = document.createElement('p');
-            p.innerText = `\n[Process finished: ${d.code}]`;
-            output.appendChild(p);
-            loadDashboard();
-        }
-    };
+// NEW CORE LOGIC: Send directly to Terminal
+async function terminalSend(cmd) {
+    showToast(`Sending to Terminal: ${cmd.substring(0, 20)}...`);
+    const response = await fetch('/api/terminal-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+    });
+    const result = await response.json();
+    if (result.error) showToast('Terminal Error: ' + result.error);
 }
 
 function runAutoPipeline() {
     const input = document.getElementById('jd-input').value.trim();
     if (input) {
-        streamCmd('node gemini-eval.mjs', `"${input.replace(/"/g, '\\"')}"`);
+        terminalSend(`/career-ops ${input}`);
         document.getElementById('jd-input').value = '';
     }
 }
@@ -97,11 +118,13 @@ async function openReport(company, path) {
     if (!path || path === '❌') return showToast('No report found');
     try {
         const res = await fetch(`/api/reports/detail?path=${encodeURIComponent(path)}`);
+        if (!res.ok) throw new Error('Report not found');
         const md = await res.text();
         document.getElementById('report-title').innerText = company;
-        document.getElementById('report-content').innerHTML = marked.parse(md);
+        const html = marked.parse(md);
+        document.getElementById('report-content').innerHTML = DOMPurify.sanitize(html);
         document.getElementById('report-panel').classList.add('show');
-    } catch (e) { showToast('Error loading report'); }
+    } catch (e) { showToast('Error loading report: ' + e.message); }
 }
 
 function closeReport() { document.getElementById('report-panel').classList.remove('show'); }

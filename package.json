@@ -1,6 +1,7 @@
 {
   "name": "career-ops",
   "version": "1.0.0",
+  "type": "module",
   "description": "AI-powered job search pipeline built on Claude Code",
   "scripts": {
     "doctor": "node doctor.mjs",
@@ -9,7 +10,7 @@
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
     "pdf": "node generate-resume-all.mjs",
-    "docx": "node resume_template.js",
+    "docx": "node resume_template.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "update:check": "node update-system.mjs check",
     "update": "node update-system.mjs apply",
