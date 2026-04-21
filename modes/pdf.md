@@ -33,14 +33,26 @@
 
 ## Diseño del PDF
 
-- **Fonts**: Space Grotesk (headings, 600-700) + DM Sans (body, 400-500)
-- **Fonts self-hosted**: `fonts/`
-- **Header**: nombre en Space Grotesk 24px bold + línea gradiente `linear-gradient(to right, hsl(187,74%,32%), hsl(270,70%,45%))` 2px + fila de contacto
-- **Section headers**: Space Grotesk 13px, uppercase, letter-spacing 0.05em, color cyan primary
-- **Body**: DM Sans 11px, line-height 1.5
-- **Company names**: color accent purple `hsl(270,70%,45%)`
-- **Márgenes**: 0.6in
-- **Background**: blanco puro
+- **Colores**: Dark Navy `#1A1A2E` (headers), Accent Blue `#2563EB` (lines/links), Muted Grey `#64748B` (meta), Body `#2D2D2D`.
+- **Fonts**: Helvetica/Arial (system sans-serif).
+- **Header**: Nombre en 20pt Bold (#1A1A2E) + Fila de contacto en 8.5pt (#64748B) + Línea gruesa (#1A1A2E) 1.5pt.
+- **Section headers**: 10pt Bold, Uppercase, letter-spacing 0.8pt, color #1A1A2E.
+- **Section dividers**: Línea delgada (#2563EB) 0.8pt inmediatamente debajo del header.
+- **Body**: 8.8pt, line-height 1.45.
+- **Item Titles (Roles/Projects)**: 9.5pt Bold (#1A1A2E).
+- **Item Meta (Company/Dates)**: 8.5pt Italic (#64748B).
+- **Márgenes**: 15mm (laterales), 12mm (superior/inferior).
+- **Background**: Blanco puro.
+
+## Estructura de contenido (HTML Injection)
+
+| Placeholder | Estructura HTML esperada |
+|-------------|-------------------------|
+| `{{SKILLS}}` | `<div class="skill-row"><div class="skill-label">Category:</div><div class="skill-values">Skill 1, Skill 2...</div></div>` |
+| `{{EXPERIENCE}}` | `<div class="item"><div class="item-title">Role — Company</div><div class="item-meta">Date | Location</div><ul><li>Bullet 1</li></ul></div>` |
+| `{{PROJECTS}}` | `<div class="item"><div class="item-title">Project Name — Description</div><div class="item-meta">Tech Stack | Date</div><ul><li>Detailed bullet 1 (Technical challenge & approach)</li><li>Detailed bullet 2 (Architecture & key components)</li><li>Detailed bullet 3 (Quantitative results & impact)</li></ul></div>` |
+| `{{EDUCATION}}` | `<div class="item"><div class="item-title">Degree — University</div><div class="item-meta">GPA | Expected Date</div></div>` |
+
 
 ## Orden de secciones (optimizado "6-second recruiter scan")
 
